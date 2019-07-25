@@ -2,10 +2,7 @@ package com.dave.invertedindex.index;
 
 import com.dave.invertedindex.document.Term;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class maintains the inverted index data structure
@@ -89,7 +86,7 @@ public class PostingsDictionary {
      * @param term
      * @return true when the term was just added to the dictionary, ie, there was still no postings list for it
      */
-    public boolean addTerm(final long documentId, final Term term) {
+    public boolean addTerm(final String documentId, final Term term) {
         //check if there is any postings list for this term,
         LinkedList<Posting> postingsList = getPostingsList(term.getToken());
         if (postingsList != null) {
@@ -117,13 +114,23 @@ public class PostingsDictionary {
         return true;
     }
 
+
+
+    public boolean removeTerm(final String documentId, final Term term) {
+        LinkedList<Posting> postingsList = getPostingsList(term.getToken());
+        if (postingsList != null) {
+            return postingsList.removeIf(it -> it.getDocumentId().equals(documentId));
+        }
+        return false;
+    }
+
     /**
      *
      * @param documentId document id
      * @param inverted inverted postings list of the document
      * @return number of new terms added to the dictionary
      */
-    protected int mergePostings(final long documentId, final Map<String, Short> inverted) {
+    protected int mergePostings(final String documentId, final Map<String, Short> inverted) {
         int count = 0;
         for(Map.Entry entry : inverted.entrySet()) {
             String term = (String)entry.getKey();

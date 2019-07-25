@@ -83,7 +83,7 @@ public abstract class TxtFile {
     }
 
 
-    public void write(HashMap<?, ?> map) throws IOException, CorruptIndexException {
+    public void write(Map<?, ?> map) throws IOException, CorruptIndexException {
         this.openWriter();
         if (this.writer != null) {
             StringBuilder sb = new StringBuilder();

@@ -27,7 +27,7 @@ public class NormsCodec implements Codec {
         if (key == null || val == null) {
             throw new CorruptIndexException("corrupted data in entry");
         }
-        long documentId = ((Long) key).longValue();
+        String documentId = (String) key;
         int count = ((Integer) val).intValue();
         formatter.format(FORMAT_STRING, documentId, count);
         formatter.format("\n");
@@ -41,7 +41,7 @@ public class NormsCodec implements Codec {
             throw new CorruptIndexException("wrong data format: ".concat(data));
         }
         try {
-            long documentId = Long.parseLong(parts[0]);
+            String documentId = parts[0];
             int count = Integer.parseInt(parts[1]);
             return new Codec.Entry<>(documentId, count);
         } catch (NumberFormatException e) {

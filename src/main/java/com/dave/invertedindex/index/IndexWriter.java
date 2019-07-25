@@ -3,7 +3,9 @@ package com.dave.invertedindex.index;
 
 import com.dave.invertedindex.document.Document;
 import com.dave.invertedindex.document.Field;
+import com.dave.invertedindex.store.DbFileDirectory;
 import com.dave.invertedindex.store.Directory;
+import com.dave.invertedindex.store.TxtFileDirectory;
 import com.dave.invertedindex.util.Benchmark;
 
 import java.io.IOException;
@@ -21,7 +23,6 @@ public class IndexWriter {
     private Index index;
 
     private FieldIndexer indexer;
-
     public IndexWriter(Directory directory) {
         this.directory = directory;
         this.index = Index.getInstance();
@@ -29,13 +30,12 @@ public class IndexWriter {
 
     }
 
-
     /**
      * Add a document to the in-memory index.
      * Iterate over all fields and add content of each field, one by one
      */
     public void addDocument(Document doc) {
-        doc.setDocumentId(index.nextDocumentId());
+
         for(String fieldName: doc.fields().keySet()) {
             Field field = doc.fields().get(fieldName);
             //for some fields (like title) we might want store them but not index them
@@ -46,6 +46,18 @@ public class IndexWriter {
             if (field.isIndexed()) {
                 indexer.addField(doc.getDocumentId(), field);
             }
+        }
+    }
+
+    public void removeDocument(Document doc) throws IOException, ClassNotFoundException {
+        for(String fieldName: doc.fields().keySet()) {
+            Field field = doc.fields().get(fieldName);
+            if(directory instanceof TxtFileDirectory){
+                indexer.removeField(doc.getDocumentId(), field);
+            }else{
+                ((DbFileDirectory)directory).removeField(doc.getDocumentId(),field);
+            }
+
         }
     }
 
@@ -77,10 +89,22 @@ public class IndexWriter {
         index.reset();
     }
 
+    public void clear(){
+        index.clear();
+    }
+
     /**
      * close all open resources and files which have been used by the index
      */
     public void close() {
         directory.close(index);
+    }
+
+    /**
+     * open the index for reading, ie, load data from directory
+     * this method only work for DbFileDirectory, not ExtFileDirectory
+     */
+    public void open() throws IOException, CorruptIndexException {
+        if(directory instanceof DbFileDirectory) directory.read(index);
     }
 }

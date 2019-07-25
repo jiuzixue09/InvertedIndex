@@ -28,7 +28,7 @@ public class StoredFieldsCodec implements Codec {
         if (key == null || val == null) {
             throw new CorruptIndexException("corrupted data in entry");
         }
-        long documentId = ((Long) key).longValue();
+        String documentId = (String) key;
         String content = (String)val;
         if (content.length() == 0) { //if there is no content, it's not necessary to write this to disk
             return;
@@ -44,7 +44,7 @@ public class StoredFieldsCodec implements Codec {
             throw new CorruptIndexException("wrong data format: ".concat(data));
         }
 
-        long documentId = Long.parseLong(parts[0]);
+        String documentId = parts[0];
         //stored field can be empty?? it shouldn't be, empty fields are not stored
         return new Codec.Entry<>(documentId, parts[1]);
     }

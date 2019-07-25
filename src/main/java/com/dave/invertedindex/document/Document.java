@@ -1,17 +1,19 @@
 package com.dave.invertedindex.document;
 
 import java.util.HashMap;
+import java.util.UUID;
 
 /**
  * Represents a single document contained in the index
  */
 public class Document {
-
+    private String generateUUID() {
+        return UUID.randomUUID().toString().replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+    }
     /**
      * unique identifier for the document in the index
-     * has to be long, integers have 32 bits in Java, the max doc Id the index could have would be  32767
      */
-    private long documentId;
+    private String documentId;
 
     /**
      * A document is composed of Fields. Every field is identified by its name (String)
@@ -19,12 +21,15 @@ public class Document {
     private final HashMap<String, Field> fields = new HashMap<>();
 
 
-    public Document(long documentId) {
+    public Document(String documentId) {
         this.setDocumentId(documentId);
     }
 
+    /**
+     * it will automatic set the document id as uuid if you haven't set the value
+     */
     public Document() {
-        this.setDocumentId(-1);
+        this.setDocumentId(generateUUID());
     }
 
     public HashMap<String, Field> fields() {
@@ -35,11 +40,11 @@ public class Document {
         this.fields.put(field.name(), field);
     }
 
-    public long getDocumentId() {
+    public String getDocumentId() {
         return documentId;
     }
 
-    public void setDocumentId(long documentId) {
+    public void setDocumentId(String documentId) {
         this.documentId = documentId;
     }
 }

@@ -12,10 +12,12 @@ public class FileConfigured extends CommonConfigured {
         configuration.setEnableAlphanumericFilter(ConfigUtil.getBooleanParameterWithDefault("ENABLE_ALPHANUMERIC_FILTER",false));
         configuration.setEnableSymbolFilter(ConfigUtil.getBooleanParameterWithDefault("ENABLE_SYMBOL_FILTER",false));
         configuration.setEnableLengthFilter(ConfigUtil.getBooleanParameterWithDefault("ENABLE_LENGTH_FILTER",false));
-        configuration.setSupportChineseParser(ConfigUtil.getBooleanParameterWithDefault("SUPPORT_CHINESE_PARSER",false));
 
         configuration.setMinLengthFilter(ConfigUtil.getIntParameterWithDefault("MIN_LENGTH_FILTER",1));
         configuration.setMaxLengthFilter(ConfigUtil.getIntParameterWithDefault("MAX_LENGTH_FILTER",50)) ;
+
+        configuration.setIndexPath(ConfigUtil.getStringParameterWithDefault("INDEX_PATH",".")) ;
+        configuration.setIndexName(ConfigUtil.getStringParameterWithDefault("INDEX_NAME","index")) ;
 
         setConf(configuration);
 

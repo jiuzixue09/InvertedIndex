@@ -18,7 +18,8 @@ public class Configuration{
     public static final String KEY_ENABLE_LENGTH_FILTER = "ENABLE_LENGTH_FILTER";
     public static final String KEY_MIN_LENGTH_FILTER = "MIN_LENGTH_FILTER";
     public static final String KEY_MAX_LENGTH_FILTER = "MAX_LENGTH_FILTER";
-    public static final String KEY_SUPPORT_CHINESE_PARSER = "SUPPORT_CHINESE_PARSER";
+    public static final String KEY_INDEX_PATH = "INDEX_PATH";
+    public static final String KEY_INDEX_NAME = "INDEX_NAME";
 
 
     protected HashMap<String, Object> data = new HashMap<String, Object>();
@@ -125,13 +126,21 @@ public class Configuration{
         return get(KEY_MAX_LENGTH_FILTER);
     }
 
-    public Configuration setSupportChineseParser(Boolean supportChineseParser){
-        return set(KEY_SUPPORT_CHINESE_PARSER, supportChineseParser);
-    }
-    public Boolean getSupportChineseParser(){
-        return get(KEY_SUPPORT_CHINESE_PARSER);
+    public Configuration setIndexPath(String indexPath){
+        return set(KEY_INDEX_PATH, indexPath);
     }
 
+    public String getIndexPath() {
+        return get(KEY_INDEX_PATH);
+    }
+
+    public Configuration setIndexName(String indexName){
+        return set(KEY_INDEX_NAME, indexName);
+    }
+
+    public String getIndexName() {
+        return get(KEY_INDEX_NAME);
+    }
 
     private static Configuration defaultConf = null;
 
@@ -147,9 +156,10 @@ public class Configuration{
                     defaultConf.set(KEY_ENABLE_LENGTH_FILTER, Config.ENABLE_LENGTH_FILTER);
                     defaultConf.set(KEY_ENABLE_LOWERCASE_FILTER, Config.ENABLE_LOWERCASE_FILTER);
                     defaultConf.set(KEY_ENABLE_STOPWORD_FILTER, Config.ENABLE_STOPWORD_FILTER);
-                    defaultConf.set(KEY_SUPPORT_CHINESE_PARSER, Config.SUPPORT_CHINESE_PARSER);
                     defaultConf.set(KEY_MIN_LENGTH_FILTER, Config.MIN_LENGTH_FILTER);
                     defaultConf.set(KEY_MAX_LENGTH_FILTER, Config.MAX_LENGTH_FILTER);
+                    defaultConf.set(KEY_INDEX_PATH, Config.INDEX_PATH);
+                    defaultConf.set(KEY_INDEX_NAME, Config.INDEX_NAME);
 
                 }
             }

@@ -1,10 +1,7 @@
 package com.dave.invertedindex.store;
 
 import com.dave.invertedindex.document.FieldInfo;
-import com.dave.invertedindex.index.CorruptIndexException;
-import com.dave.invertedindex.index.Index;
-import com.dave.invertedindex.index.Posting;
-import com.dave.invertedindex.index.PostingsDictionary;
+import com.dave.invertedindex.index.*;
 import com.dave.invertedindex.store.codec.FieldConfigCodec;
 import com.dave.invertedindex.store.codec.NormsCodec;
 import com.dave.invertedindex.store.codec.PostingsCodec;
@@ -65,6 +62,7 @@ public class TxtFileDirectory implements Directory {
         //to reload index from disk, it's necessary to keep a file with names of the fields that are indexed and stored
         FieldConfigFile fiFile = new FieldConfigFile(this.directoryPath.concat(TxtFileDirectory.FIELDS_CONFIG_FILE), new FieldConfigCodec());
         fiFile.write(index.getFieldNamesByOption());
+
     }
 
 
@@ -95,11 +93,11 @@ public class TxtFileDirectory implements Directory {
      */
     public Index read(Index index) throws IOException, CorruptIndexException {
         //init HashMaps that will keep the index
-        HashMap<String, HashMap<Long, Integer>> norms = new HashMap<>();
+        Map<String, Map<String, Integer>> norms = new HashMap<>();
 
         HashMap<String, PostingsDictionary> dictionary = new HashMap<>();
 
-        HashMap<String, HashMap<Long, String>> stored = new HashMap<>();
+        Map<String, Map<String, String>> stored = new HashMap<>();
 
         //now load fields config info
         FieldConfigFile fiFile = new FieldConfigFile(this.directoryPath.concat(TxtFileDirectory.FIELDS_CONFIG_FILE), new FieldConfigCodec());
@@ -123,7 +121,7 @@ public class TxtFileDirectory implements Directory {
              * TODO solution that would allow to parse different files in parallel,
              */
             NormsFile fNorms = new NormsFile(this.directoryPath.concat(TxtFileDirectory.NORMS_FILE.concat(fieldName)), new NormsCodec());
-            HashMap<Long,Integer> fieldNorms = (HashMap<Long,Integer>)fNorms.read();
+            HashMap<String,Integer> fieldNorms = (HashMap<String,Integer>)fNorms.read();
             if (fieldNorms == null || fieldNorms.isEmpty()) {
                 Logger.getInstance().error("empty norms file for field: " .concat(fieldName));
                 return null;
@@ -143,12 +141,13 @@ public class TxtFileDirectory implements Directory {
              * small chunks, parallel access using threads
              */
             StoredFieldsFile fStored = new StoredFieldsFile(this.directoryPath.concat(TxtFileDirectory.STORED_CONTENT_FILE).concat(fieldName), new StoredFieldsCodec());
-            HashMap<Long, String> fieldStored = (HashMap<Long, String>)fStored.read();
+            HashMap<String, String> fieldStored = (HashMap<String, String>)fStored.read();
             if (fieldStored == null || fieldStored.isEmpty()) {
                 Logger.getInstance().error("error reading stored content file ".concat(fieldName));
                 return null;
             }
             stored.put(fieldName, fieldStored);
+
         }
         //at this point, we have already all what we need to start, set data in the index and return it
         index.setNormsByDocument(norms);

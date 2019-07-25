@@ -6,6 +6,7 @@ import com.dave.invertedindex.document.FieldInfo;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -22,17 +23,17 @@ public class Index {
      * A postings dictionary keep list of terms-postings list
      * In a terms-postings list,for every indexed Term we keep a list of Postings
      */
-    protected HashMap<String, PostingsDictionary> postingsDictionary = new HashMap<>();
+    protected Map<String, PostingsDictionary> postingsDictionary = new HashMap<>();
 
     /**
      * norms of every docId-fieldName
      */
-    protected HashMap<String, HashMap<Long, Integer>> normsByDocument = new HashMap<>();
+    protected Map<String, Map<String, Integer>> normsByDocument = new HashMap<>();
 
     /**
      * For every stored field, we have a HashMap with documentId as key and the stored field as value
      */
-    protected HashMap<String, HashMap<Long, String>> storedByDocument = new HashMap<>();
+    protected Map<String, Map<String, String>> storedByDocument = new HashMap<>();
 
 
     /**
@@ -81,6 +82,10 @@ public class Index {
         return ++this.numDocs;
     }
 
+    public void setNumDocs(long numDocs) {
+        this.numDocs = numDocs;
+    }
+
     /**
      * if a new term is added to the dictionary, increase the counter
      * @return the new value for the count
@@ -107,8 +112,8 @@ public class Index {
      * @param fieldName
      * @return
      */
-    public HashMap<Long, Integer> getDocumentNorms(final String fieldName) {
-        HashMap<Long, Integer> norms = this.normsByDocument.computeIfAbsent(fieldName, k -> new HashMap<>());
+    public Map<String, Integer> getDocumentNorms(final String fieldName) {
+        Map<String, Integer> norms = this.normsByDocument.computeIfAbsent(fieldName, k -> new HashMap<>());
         return norms;
     }
 
@@ -118,8 +123,8 @@ public class Index {
      * @param fieldName
      * @return
      */
-    public HashMap<Long, String> getStoredDocuments(final String fieldName) {
-        HashMap<Long, String> stored = this.storedByDocument.computeIfAbsent(fieldName, k -> new HashMap<>());
+    public Map<String, String> getStoredDocuments(final String fieldName) {
+        Map<String, String> stored = this.storedByDocument.computeIfAbsent(fieldName, k -> new HashMap<>());
         return stored;
     }
 
@@ -145,7 +150,8 @@ public class Index {
                     fields = new HashSet<>();
                 }
             }
-            this.fieldNamesByOption.put(fieldOption, fields);
+            if(fields.size() > 0)
+             this.fieldNamesByOption.put(fieldOption, fields);
         }
         return fields;
     }
@@ -159,11 +165,11 @@ public class Index {
         return this.fieldNamesByOption;
     }
 
-    public void setNormsByDocument(HashMap<String, HashMap<Long, Integer>> normsByDocument) {
+    public void setNormsByDocument(Map<String, Map<String, Integer>> normsByDocument) {
         this.normsByDocument = normsByDocument;
     }
 
-    public void setStoredByDocument(HashMap<String, HashMap<Long, String>> storedByDocument) {
+    public void setStoredByDocument(Map<String, Map<String, String>> storedByDocument) {
         this.storedByDocument = storedByDocument;
     }
 
@@ -192,11 +198,11 @@ public class Index {
      * @param documentId
      * @return Document containing retrieved data
      */
-    public Document document(final long documentId) {
+    public Document document(final String documentId) {
         Document doc = new Document(documentId);
 
         for(String fieldName: storedByDocument.keySet()) {
-            HashMap<Long, String> storedData = this.storedByDocument.get(fieldName);
+            Map<String, String> storedData = this.storedByDocument.get(fieldName);
             if (storedData.containsKey(documentId)) {
                 Field f = new Field(fieldName, storedData.get(documentId));
                 doc.addField(f);
@@ -211,6 +217,13 @@ public class Index {
     public void reset() {
         this.numDocs = 0;
         this.numTerms = 0;
+        this.fieldNamesByOption.clear();
+        this.postingsDictionary.clear();
+        this.normsByDocument.clear();
+        this.storedByDocument.clear();
+    }
+
+    public void clear(){
         this.fieldNamesByOption.clear();
         this.postingsDictionary.clear();
         this.normsByDocument.clear();

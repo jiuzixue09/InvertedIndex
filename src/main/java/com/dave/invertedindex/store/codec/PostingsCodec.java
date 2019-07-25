@@ -64,7 +64,7 @@ public class PostingsCodec implements Codec {
             if (postingStr.length != 2 || postingStr[0].length() == 0 || postingStr[1].length() == 0) {
                 throw new CorruptIndexException("wrong data format: ".concat(data));
             }
-            long documentId = Long.parseLong(postingStr[0]);
+            String documentId = postingStr[0];
             short termFreq = Short.parseShort(postingStr[1]);
             //construct a posting from the read values
             Posting posting = new Posting(documentId, termFreq);

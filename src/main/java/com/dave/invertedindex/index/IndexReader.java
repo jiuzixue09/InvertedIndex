@@ -4,7 +4,7 @@ import com.dave.invertedindex.document.Document;
 import com.dave.invertedindex.document.Field;
 import com.dave.invertedindex.document.Term;
 import com.dave.invertedindex.parse.DataStream;
-import com.dave.invertedindex.parse.TextParser;
+import com.dave.invertedindex.store.DbFileDirectory;
 import com.dave.invertedindex.store.Directory;
 import com.dave.invertedindex.store.TxtFileDirectory;
 import com.dave.invertedindex.util.Logger;
@@ -69,7 +69,7 @@ public class IndexReader {
     }
 
     private TreeSet<Hit> query(Document document) throws IOException, CorruptIndexException {
-        Map<Long, Hit> map = new HashMap<>();
+        Map<String, Hit> map = new HashMap<>();
         for (Map.Entry<String, Field> entry : document.fields().entrySet()) {
             String fieldName = entry.getKey();
             Field field = entry.getValue();
@@ -164,12 +164,19 @@ public class IndexReader {
             Logger.getInstance().error(String.format("field %s is not indexed, hence, not searchable" , term.getFieldName()));
             return null;
         }
-        //first check if there is any postings list for this term already in memory
-        LinkedList<Posting> postingsList = dictionary.getPostingsList(term.getToken());
-        if (postingsList == null && dictionary.getPostingsBlock(dictionary.getKeyForTerm(term.token)).size() == 0) {
-            //if not, try to load from disk
-            dictionary = ((TxtFileDirectory)directory).readPostingsBlock(dictionary, term.getFieldName(), term.getToken());
+
+        LinkedList<Posting> postingsList = null;
+        if(directory instanceof TxtFileDirectory){
+            //first check if there is any postings list for this term already in memory
             postingsList = dictionary.getPostingsList(term.getToken());
+            if(null != postingsList && postingsList.size() > 0) return postingsList;
+        }
+
+        if (directory instanceof DbFileDirectory || dictionary.getPostingsBlock(dictionary.getKeyForTerm(term.token)).size() == 0) {
+            //if not, try to load from disk
+            dictionary = (directory).readPostingsBlock(dictionary, term.getFieldName(), term.getToken());
+            postingsList = dictionary.getPostingsList(term.getToken());
+
         }
 
         return postingsList;

@@ -2,6 +2,7 @@ package com.dave.invertedindex.store;
 
 import com.dave.invertedindex.index.CorruptIndexException;
 import com.dave.invertedindex.index.Index;
+import com.dave.invertedindex.index.PostingsDictionary;
 
 import java.io.IOException;
 
@@ -22,6 +23,8 @@ public interface Directory {
      */
     public Index read(Index index) throws IOException, CorruptIndexException;
 
+    public PostingsDictionary readPostingsBlock(PostingsDictionary dictionary, String fieldName, String term) throws IOException, CorruptIndexException;
+
     /**
      * reset the index, ie, delete all files stored in disk
      */
@@ -31,4 +34,6 @@ public interface Directory {
      * close open files and resources
      */
     public void close(Index index);
+
+
 }

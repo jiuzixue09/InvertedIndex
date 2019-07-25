@@ -4,7 +4,6 @@ import com.dave.invertedindex.document.Field;
 import com.dave.invertedindex.document.Term;
 import com.dave.invertedindex.parse.DataStream;
 import com.dave.invertedindex.parse.Parser;
-import com.dave.invertedindex.parse.TextParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +29,7 @@ public class FieldIndexer {
      * @param field
      * @param documentId
      */
-    public void addField(final long documentId, final Field field) {
+    public void addField(final String documentId, final Field field) {
         int docTermsCount = 0;
         int newTermsCount = 0;
         //identifiers or keywords can be indexed without being tokenized
@@ -74,6 +73,38 @@ public class FieldIndexer {
         index.getDocumentNorms(field.name()).put(documentId, docTermsCount);
     }
 
+    public void removeField(final String documentId, final Field field) {
+        if (field.isStored()) {
+            index.getStoredDocuments(field.name()).remove(documentId);
+        }else if(field.isIndexed()){
+            //identifiers or keywords can be indexed without being tokenized
+            if (!field.isTokenized()) {
+                //just put the content inside a term and add it to the index
+                Term term = new Term(field.name(), field.data());
+                PostingsDictionary dictionary = index.getPostingsDictionary(term.getFieldName());
+                dictionary.removeTerm(documentId, term);
+            } else {
+                //get the stream that  provides the terms
+                Parser parser = field.getParser();
+                DataStream stream = parser.dataStream(field.name(), field.data());
+                stream.start();
+                //get the tokens and add to the index
+                while (stream.hasMoreTokens()) {
+                    String token = stream.out();
+                    if (token.length() > 0) {
+                        Term term = new Term(field.name(), token);
+                        PostingsDictionary dictionary = index.getPostingsDictionary(term.getFieldName());
+                        dictionary.removeTerm(documentId, term);
+
+                    }
+                }
+
+            }
+        }
+
+
+        index.getDocumentNorms(field.name()).remove(documentId);
+    }
 
     /**
      * Build an inverted list for the terms contained by this Field
