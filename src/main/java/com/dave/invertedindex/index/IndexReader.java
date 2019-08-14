@@ -4,6 +4,7 @@ import com.dave.invertedindex.document.Document;
 import com.dave.invertedindex.document.Field;
 import com.dave.invertedindex.document.Term;
 import com.dave.invertedindex.parse.DataStream;
+import com.dave.invertedindex.parse.Parser;
 import com.dave.invertedindex.store.DbFileDirectory;
 import com.dave.invertedindex.store.Directory;
 import com.dave.invertedindex.store.TxtFileDirectory;
@@ -73,16 +74,21 @@ public class IndexReader {
         for (Map.Entry<String, Field> entry : document.fields().entrySet()) {
             String fieldName = entry.getKey();
             Field field = entry.getValue();
-
-            DataStream stream = field.getDataStream(field.getParser());
-
-            stream.start();
+            if(null == field.data() || field.data().isBlank()) continue;
             Set<String> tokens = new HashSet<>();
-            while (stream.hasMoreTokens()){
-                String token = stream.out();
-                if(token.isBlank()) continue;
-                tokens.add(token);
+
+            Parser parser = field.getParser();
+            if(null != parser){
+                DataStream stream = field.getDataStream(parser);
+                stream.start();
+
+                while (stream.hasMoreTokens()){
+                    String token = stream.out();
+                    if(token.isBlank()) continue;
+                    tokens.add(token);
+                }
             }
+
             for (String token : tokens) {
                 Term term = new Term(fieldName, token);
                 LinkedList<Posting> postingsList = lookupData(term);
@@ -98,7 +104,8 @@ public class IndexReader {
                     Document doc = index.document(p.getDocumentId());
 
                     if(map.containsKey(p.getDocumentId())){
-                        map.get(p.getDocumentId()).setScore((float) (score + map.get(p.getDocumentId()).score()));
+                        Hit hit = map.get(p.getDocumentId());
+                        hit.setScore((float) (score + hit.score()));
                     }else{
                         map.put(p.getDocumentId(),new Hit(doc, (float) score));
                     }

@@ -76,6 +76,7 @@ public class Field {
      */
     public Parser getParser() {
         Class c = options.getTokenizer();
+        if(null == c) return null;
         try {
             Tokenizer tokenizer = (Tokenizer)c.getDeclaredConstructor().newInstance();
             return new TextParser(tokenizer);
